@@ -1,0 +1,13 @@
+<select
+    class="form-select"
+    aria-label="Default select example"
+    hx-get="/show"
+    hx-trigger="change[this.value !== '']"
+    hx-target="#crdProperties"
+    hx-swap="innerHTML"
+    hx-vals='js:{"crdName": this.value}'>
+    <option selected>Select a CRD</option>
+    {{ range .Crds }}
+    <option value="{{.Name}}">{{.Spec.Names.Kind}}</option>
+    {{ end }}
+</select>

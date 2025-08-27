@@ -1,0 +1,83 @@
+
+<h3>{{ .CRD.Spec.Names.Kind }} Properties</h3>
+
+<div class="accordion" id="crdPropertiesAccordion">
+
+{{ with index .Schema.Properties "spec" }}
+  {{ if .Type }}
+    {{ template "renderProperty" (dict "name" "spec" "schema" . "path" "spec") }}
+  {{ end }}
+{{ end }}
+
+{{ with index .Schema.Properties "status" }}
+  {{ if .Type }}
+    {{ template "renderProperty" (dict "name" "status" "schema" . "path" "status") }}
+  {{ end }}
+{{ end }}
+
+</div>
+
+{{ define "renderProperty" }}
+  {{ $name := .name }}
+  {{ $schema := .schema }}
+  {{ $path := .path }}
+  {{ $headerID := printf "heading-%s" (replaceAll $path "." "-") }}
+  {{ $collapseID := printf "collapse-%s" (replaceAll $path "." "-") }}
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="{{ $headerID }}">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ $collapseID }}" aria-expanded="false" aria-controls="{{ $collapseID }}">
+        {{ $name }} <small class="text-muted">({{ or $schema.Type "unspecified" }})</small>
+      </button>
+    </h2>
+    <div id="{{ $collapseID }}" class="accordion-collapse collapse" aria-labelledby="{{ $headerID }}">
+      <div class="accordion-body">
+        {{ if $schema.Description }}
+          <p>{{ $schema.Description }}</p>
+        {{ end }}
+        {{ if eq $schema.Type "object" }}
+          {{ if $schema.Required }}
+            <p>Required properties: {{ join $schema.Required ", " }}</p>
+          {{ end }}
+          {{ if derefBool $schema.XPreserveUnknownFields }}
+            <p>Preserves unknown fields</p>
+          {{ end }}
+        {{ end }}
+        {{ if $schema.Format }}
+          <p>Format: {{ $schema.Format }}</p>
+        {{ end }}
+        {{ if eq $schema.Type "object" }}
+          {{ if $schema.Properties }}
+            <div class="accordion ms-3">
+              {{ range $propName, $propSchema := $schema.Properties }}
+                {{ template "renderProperty" (dict "name" $propName "schema" $propSchema "path" (printf "%s.%s" $path $propName)) }}
+              {{ end }}
+            </div>
+          {{ end }}
+          {{ if $schema.AdditionalProperties }}
+            {{ if $schema.AdditionalProperties.Schema }}
+              <p>Additional properties (map values):</p>
+              <div class="accordion ms-3">
+                {{ template "renderProperty" (dict "name" "[key]" "schema" $schema.AdditionalProperties.Schema "path" (printf "%s.[key]" $path)) }}
+              </div>
+            {{ else if $schema.AdditionalProperties.Allows }}
+              <p>Additional properties: any type</p>
+            {{ end }}
+          {{ end }}
+        {{ else if eq $schema.Type "array" }}
+          {{ if $schema.Items }}
+            <p>Array items:</p>
+            <div class="accordion ms-3">
+              {{ if $schema.Items.Schema }}
+                {{ template "renderProperty" (dict "name" "[item]" "schema" $schema.Items.Schema "path" (printf "%s.[item]" $path)) }}
+              {{ else }}
+                {{ range $idx, $itemSchema := $schema.Items.JSONSchemas }}
+                  {{ template "renderProperty" (dict "name" (printf "[item %d]" $idx) "schema" $itemSchema "path" (printf "%s.[item%d]" $path $idx)) }}
+                {{ end }}
+              {{ end }}
+            </div>
+          {{ end }}
+        {{ end }}
+      </div>
+    </div>
+  </div>
+{{ end }}
