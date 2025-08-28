@@ -1,0 +1,24 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: crdviz
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - crdviz.local.zachary.day
+      secretName: crdviz-server-tls
+  rules:
+    - host: crdviz.local.zachary.day
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: crdviz
+                port:
+                  name: http
