@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: crdviz
+  name: crdviz
+  namespace: crdviz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crdviz
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: crdviz
+    spec:
+      serviceAccountName: crdviz-sa
+      securityContext:
+        fsGroup: 65532
+        runAsNonRoot: true
+      containers:
+      - image: ghcr.io/dayzpd/crdviz
+        name: crdviz
+        args:
+        - --in-cluster
+        - --port=8080
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        securityContext:
+          runAsGroup: 65532
+          runAsUser: 65532
+          runAsNonRoot: true
+        resources:
+          requests:
+            memory: 100Mi
+            cpu: 100M
+          limits:
+            memory: 200Mi
+            cpu: 200M
