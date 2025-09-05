@@ -222,22 +222,26 @@ func handleShowCrd(
 	crd := getCrdByName(crdName)
 
 	var schema *apiextensionsv1.JSONSchemaProps
+	var apiVersion string
 
 	for _, version := range crd.Spec.Versions {
 
 		if version.Storage {
 			schema = version.Schema.OpenAPIV3Schema
+			apiVersion = version.Name
 			break
 		}
 
 	}
 
 	data := struct {
-		CRD    *apiextensionsv1.CustomResourceDefinition
-		Schema *apiextensionsv1.JSONSchemaProps
+		CRD        *apiextensionsv1.CustomResourceDefinition
+		Schema     *apiextensionsv1.JSONSchemaProps
+		APIVersion string
 	}{
-		CRD:    crd,
-		Schema: schema,
+		CRD:        crd,
+		Schema:     schema,
+		APIVersion: apiVersion,
 	}
 
 	if err := crdPropertiesTmpl.Execute(w, data); err != nil {

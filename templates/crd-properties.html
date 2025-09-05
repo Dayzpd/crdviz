@@ -1,7 +1,7 @@
 
-<h3>{{ .CRD.Spec.Names.Kind }} Properties</h3>
+<h3>{{ .CRD.Spec.Names.Kind }} (APIVersion: {{ .APIVersion }})</h3>
 
-<div class="accordion" id="crdPropertiesAccordion">
+<div class="accordion mt-4" id="crdPropertiesAccordion">
 
 {{ with index .Schema.Properties "spec" }}
   {{ if .Type }}
