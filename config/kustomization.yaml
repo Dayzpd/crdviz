@@ -10,4 +10,4 @@ resources:
 - service.yaml
 images:
 - name: ghcr.io/dayzpd/crdviz
-  newTag: "1"
+  newTag: "2"
